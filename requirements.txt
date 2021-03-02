@@ -1,0 +1,7 @@
+dataclasses-json==0.4.2
+jsonlines~=1.2.0
+librosa==0.7.2
+numba==0.48
+numpy==1.19.0
+scipy==1.5.1
+torch>=1.6.0

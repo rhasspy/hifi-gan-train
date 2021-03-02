@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Directory of *this* script
+this_dir="$( cd "$( dirname "$0" )" && pwd )"
+src_dir="$(realpath "${this_dir}/..")"
+
+venv="${src_dir}/.venv"
+if [[ -d "${venv}" ]]; then
+    source "${venv}/bin/activate"
+fi
+
+args=()
+
+git_commit="$(git -C "${src_dir}" rev-parse --short HEAD || true)"
+if [[ -n "${git_commit}" ]]; then
+    args+=('--git-commit' "${git_commit}")
+fi
+
+args+=("$@")
+
+
+export PYTHONPATH="${src_dir}:${PYTHONPATH}"
+python3 -m hifi_gan_train "${args[@]}"
