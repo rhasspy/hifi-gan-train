@@ -17,12 +17,12 @@ from .dataset import MelDataset
 from .models import TrainingModel, setup_model
 from .train import train
 
-_LOGGER = logging.getLogger("tacotron2_train")
+_LOGGER = logging.getLogger("hifi_gan_train")
 
 
 def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(prog="tacotron2-train")
+    parser = argparse.ArgumentParser(prog="hifi-gan-train")
     parser.add_argument("model_dir", help="Directory to store model artifacts")
     parser.add_argument(
         "--config", action="append", help="Path to JSON configuration file(s)"
@@ -40,6 +40,7 @@ def main():
     parser.add_argument(
         "--local_rank", type=int, help="Rank passed from torch.distributed.launch"
     )
+    parser.add_argument("--git-commit", help="Git commit to store in config")
     parser.add_argument(
         "--debug", action="store_true", help="Print DEBUG messages to the console"
     )
@@ -79,6 +80,8 @@ def main():
     if args.config:
         _LOGGER.debug("Loading configuration(s) from %s", args.config)
         config = TrainingConfig.load_and_merge(config, args.config)
+
+    config.git_commit = args.git_commit
 
     # Create output directory
     args.model_dir.mkdir(parents=True, exist_ok=True)

@@ -20,7 +20,7 @@ from .models import (
 )
 from .utils import to_gpu
 
-_LOGGER = logging.getLogger("tacotron2_train")
+_LOGGER = logging.getLogger("hifi_gan_train")
 
 # -----------------------------------------------------------------------------
 
@@ -62,8 +62,8 @@ def train(
 
         if ((epoch % checkpoint_epochs) == 0) and (rank == 0):
             # Save checkpoint
-            checkpoint_path = model_dir / f"checkpoint_{global_step}.pth"
-            _LOGGER.debug("Saving checkpoint to %s", checkpoint_path)
+            checkpoint_dir = model_dir / f"checkpoint_{global_step}"
+            _LOGGER.debug("Saving checkpoint to %s", checkpoint_dir)
             save_checkpoint(
                 Checkpoint(
                     training_model=training_model,
@@ -71,15 +71,15 @@ def train(
                     global_step=global_step,
                     version=config.version,
                 ),
-                checkpoint_path,
+                checkpoint_dir,
             )
 
             # Save checkpoint config
-            config_path = model_dir / f"config_{global_step}.json"
+            config_path = checkpoint_dir / f"config.json"
             with open(config_path, "w") as config_file:
                 config.save(config_file)
 
-            _LOGGER.info("Saved checkpoint to %s", checkpoint_path)
+            _LOGGER.info("Saved checkpoint to %s", checkpoint_dir)
 
         epoch_end_time = time.perf_counter()
         _LOGGER.debug(
