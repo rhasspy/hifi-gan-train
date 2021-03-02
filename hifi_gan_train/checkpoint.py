@@ -81,23 +81,36 @@ def load_checkpoint(
     _LOGGER.debug("Loading generator from %s", generator_path)
     generator_dict = torch.load(generator_path, map_location="cpu")
 
+    assert "generator" in generator_dict, "Missing 'generator' in state dict"
     version = int(generator_dict.get("version", 1))
     global_step = int(generator_dict.get("global_step", 1))
     epoch = int(generator_dict.get("epoch", -1))
 
-    if not training_model:
+    # Set up the generator first
+    training_model = setup_model(
+        config=config,
+        training_model=training_model,
+        create_discriminator_optimizer=False,
+        create_schedulers=False,
+        last_epoch=epoch,
+        use_cuda=use_cuda,
+    )
+
+    assert training_model.generator, "No generator"
+    set_state_dict(training_model.generator, generator_dict["generator"])
+
+    # Load discriminator/optimizer states
+    if load_discriminator_optimizer:
+        # Set up discriminators and optimizers
         training_model = setup_model(
-            config,
-            create_discriminator_optimizer=load_discriminator_optimizer,
+            config=config,
+            training_model=training_model,
+            create_discriminator_optimizer=True,
+            create_schedulers=False,
             last_epoch=epoch,
             use_cuda=use_cuda,
         )
 
-    assert training_model.generator, "No generator"
-    set_state_dict(training_model.generator, generator_dict)
-
-    # Load discriminator/optimizer states
-    if load_discriminator_optimizer:
         # Verify model has been set up
         assert training_model.mpd, "No multi-period discriminator"
         assert training_model.msd, "No multi-scale discriminator"
@@ -113,6 +126,21 @@ def load_checkpoint(
         set_state_dict(training_model.msd, discrim_optim_dict["msd"])
         set_state_dict(training_model.optimizer_d, discrim_optim_dict["optim_d"])
         set_state_dict(training_model.optimizer_g, discrim_optim_dict["optim_g"])
+
+        # Fix initial learning rate parameter for optimizers
+        for optimizer in [training_model.optimizer_d, training_model.optimizer_g]:
+            for param_group in optimizer.param_groups:
+                param_group["initial_lr"] = config.learning_rate
+
+        # Set up schedulers
+        training_model = setup_model(
+            config=config,
+            training_model=training_model,
+            create_discriminator_optimizer=True,
+            create_schedulers=True,
+            last_epoch=epoch,
+            use_cuda=use_cuda,
+        )
 
         do_epoch = int(discrim_optim_dict.get("epoch", epoch))
         do_version = int(discrim_optim_dict.get("version", version))

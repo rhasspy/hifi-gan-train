@@ -421,6 +421,7 @@ def setup_model(
     config: TrainingConfig,
     training_model: typing.Optional[TrainingModel] = None,
     create_discriminator_optimizer: bool = True,
+    create_schedulers: bool = True,
     last_epoch: int = -1,
     use_cuda: bool = True,
 ) -> TrainingModel:
@@ -452,16 +453,17 @@ def setup_model(
                 betas=(config.adam_b1, config.adam_b2),
             )
 
-        if training_model.scheduler_g is None:
-            training_model.scheduler_g = torch.optim.lr_scheduler.ExponentialLR(
-                training_model.optimizer_g, gamma=config.lr_decay, last_epoch=last_epoch
-            )
-
         if training_model.optimizer_d is None:
             training_model.optimizer_d = torch.optim.AdamW(
                 training_model.generator.parameters(),
                 config.learning_rate,
                 betas=(config.adam_b1, config.adam_b2),
+            )
+
+    if create_schedulers:
+        if training_model.scheduler_g is None:
+            training_model.scheduler_g = torch.optim.lr_scheduler.ExponentialLR(
+                training_model.optimizer_g, gamma=config.lr_decay, last_epoch=last_epoch
             )
 
         if training_model.scheduler_d is None:
