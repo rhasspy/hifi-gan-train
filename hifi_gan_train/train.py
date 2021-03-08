@@ -9,8 +9,8 @@ from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 
 from .checkpoint import Checkpoint, save_checkpoint
-from .dataset import MelFunction
 from .config import TrainingConfig
+from .dataset import MelFunction
 from .models import (
     TrainingModel,
     discriminator_loss,
