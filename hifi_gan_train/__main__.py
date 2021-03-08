@@ -48,6 +48,10 @@ def main():
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
+
+        # Disable numba logger
+        numba_logger = logging.getLogger("numba")
+        numba_logger.setLevel(logging.WARNING)
     else:
         logging.basicConfig(level=logging.INFO)
 
@@ -69,11 +73,17 @@ def main():
     # Convert to paths
     args.model_dir = Path(args.model_dir)
 
-    if args.config:
-        args.config = [Path(p) for p in args.config]
-
     if args.checkpoint:
         args.checkpoint = Path(args.checkpoint)
+
+    if args.config:
+        args.config = [Path(p) for p in args.config]
+    elif args.checkpoint:
+        # Look for config in checkpoint directory
+        maybe_config_path = args.checkpoint / "config.json"
+        if maybe_config_path.is_file():
+            _LOGGER.debug("Found config in checkpoint directory: %s", maybe_config_path)
+            args.config = [maybe_config_path]
 
     # Load configuration
     config = TrainingConfig()
@@ -82,6 +92,8 @@ def main():
         config = TrainingConfig.load_and_merge(config, args.config)
 
     config.git_commit = args.git_commit
+
+    _LOGGER.debug(config)
 
     # Create output directory
     args.model_dir.mkdir(parents=True, exist_ok=True)
@@ -113,6 +125,7 @@ def main():
         dataset,
         shuffle=(not is_distributed),
         batch_size=batch_size,
+        num_workers=config.num_workers,
         pin_memory=True,
         drop_last=True,
         sampler=sampler,

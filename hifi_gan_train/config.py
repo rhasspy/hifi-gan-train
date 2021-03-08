@@ -50,6 +50,7 @@ class TrainingConfig(DataClassJsonMixin):
     lr_decay: float = 0.999
     batch_size: int = 32
     fp16_run: bool = False
+    num_workers: int = 4
     audio: AudioConfig = field(default_factory=AudioConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     version: int = 1

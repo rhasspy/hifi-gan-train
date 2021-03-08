@@ -41,7 +41,10 @@ def train(
     training_model = setup_model(config, training_model=training_model)
 
     # Gradient scaler
-    scaler = GradScaler() if config.fp16_run else None
+    scaler: typing.Optional[GradScaler] = None
+    if config.fp16_run:
+        _LOGGER.debug("Using fp16 training")
+        scaler = GradScaler()
 
     # Begin training
     for epoch in range(1, config.epochs + 1):
