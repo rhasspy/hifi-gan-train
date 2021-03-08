@@ -9,4 +9,4 @@ if [[ -d "${venv}" ]]; then
 fi
 
 export PYTHONPATH="${src_dir}:${PYTHONPATH}"
-python3 -m tacotron2_train.infer_onnx "$@"
+python3 -m hifi_gan_train.infer_onnx "$@"
