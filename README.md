@@ -1,6 +1,9 @@
 # Hi-Fi GAN
 
-Version of [Hi-Fi GAN](https://github.com/jik876/hifi-gan) designed to work with [gruut](https://github.com/rhasspy/gruut).
+Version of [Hi-Fi GAN](https://github.com/jik876/hifi-gan) designed to work with
+
+* [tacotron2-train](https://github.com/rhasspy/tacotron2-train)
+* [glow-tts-train](https://github.com/rhasspy/glow-tts-train)
 
 ## Additional Features
 
