@@ -462,11 +462,13 @@ def setup_model(
 
     if create_schedulers:
         if training_model.scheduler_g is None:
+            assert training_model.optimizer_g
             training_model.scheduler_g = torch.optim.lr_scheduler.ExponentialLR(
                 training_model.optimizer_g, gamma=config.lr_decay, last_epoch=last_epoch
             )
 
         if training_model.scheduler_d is None:
+            assert training_model.optimizer_d
             training_model.scheduler_d = torch.optim.lr_scheduler.ExponentialLR(
                 training_model.optimizer_d, gamma=config.lr_decay, last_epoch=last_epoch
             )
