@@ -181,6 +181,8 @@ def train_step(
             loss_disc_all.backward()
             loss_gen_all.backward()
 
+            torch.nn.utils.clip_grad_norm_(generator.parameters(), config.grad_clip)
+
             optim_d.step()
             optim_g.step()
 
