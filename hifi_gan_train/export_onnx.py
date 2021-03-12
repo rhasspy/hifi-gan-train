@@ -44,7 +44,7 @@ def main():
 
     if args.config:
         args.config = [Path(p) for p in args.config]
-    elif args.checkpoint:
+    elif args.checkpoint and args.checkpoint.is_dir():
         # Look for config in checkpoint directory
         maybe_config_path = args.checkpoint / "config.json"
         if maybe_config_path.is_file():
@@ -72,8 +72,14 @@ def main():
     generator.eval()
     generator.remove_weight_norm()
 
-    # Create output directory
-    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.output.is_dir():
+        # Output to directory
+        args.output.mkdir(parents=True, exist_ok=True)
+        output_path = args.output / "generator.onnx"
+    else:
+        # Output to file
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        output_path = args.output
 
     # Create dummy input
     dummy_input = to_gpu(torch.randn((1, config.audio.num_mels, 50), dtype=torch.float))
@@ -82,7 +88,7 @@ def main():
     torch.onnx.export(
         generator,
         dummy_input,
-        str(args.output / "generator.onnx"),
+        str(output_path),
         opset_version=12,
         do_constant_folding=True,
         input_names=["mel"],

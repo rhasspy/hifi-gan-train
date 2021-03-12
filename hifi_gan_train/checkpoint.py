@@ -76,7 +76,12 @@ def load_checkpoint(
 ) -> Checkpoint:
     """Load models and training state from a directory of Torch checkpoints"""
     # Generator
-    generator_path = checkpoint_dir / "generator.pth"
+    if checkpoint_dir.is_file():
+        # Path is to generator only
+        generator_path = checkpoint_dir
+        load_discriminator_optimizer = False
+    else:
+        generator_path = checkpoint_dir / "generator.pth"
 
     _LOGGER.debug("Loading generator from %s", generator_path)
     generator_dict = torch.load(generator_path, map_location="cpu")
