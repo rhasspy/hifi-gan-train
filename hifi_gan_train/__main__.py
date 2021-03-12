@@ -140,7 +140,10 @@ def main():
         training_model = checkpoint.training_model
         global_step = checkpoint.global_step
         _LOGGER.info(
-            "Loaded checkpoint from %s (global step=%s)", args.checkpoint, global_step
+            "Loaded checkpoint from %s (global step=%s, epoch=%s)",
+            args.checkpoint,
+            global_step,
+            checkpoint.epoch,
         )
     else:
         training_model = setup_model(config)
@@ -153,7 +156,6 @@ def main():
 
     # Train
     _LOGGER.info("Training started (batch size=%s)", batch_size)
-    # torch.autograd.set_detect_anomaly(True)
     try:
         train(
             train_loader,

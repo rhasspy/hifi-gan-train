@@ -172,6 +172,11 @@ def train_step(
             scaler.scale(loss_disc_all).backward()
             scaler.scale(loss_gen_all).backward()
 
+            if config.grad_clip is not None:
+                scaler.unscale_(optim_d)
+                scaler.unscale_(optim_g)
+                torch.nn.utils.clip_grad_norm_(generator.parameters(), config.grad_clip)
+
             scaler.step(optim_d)
             scaler.step(optim_g)
 
@@ -181,7 +186,8 @@ def train_step(
             loss_disc_all.backward()
             loss_gen_all.backward()
 
-            torch.nn.utils.clip_grad_norm_(generator.parameters(), config.grad_clip)
+            if config.grad_clip is not None:
+                torch.nn.utils.clip_grad_norm_(generator.parameters(), config.grad_clip)
 
             optim_d.step()
             optim_g.step()
